@@ -188,6 +188,10 @@ class Mailchimp
             $this->options['json'] = $arguments;
         }
 
+        if ($arguments['language']) {
+            $this->options['headers']['Accept-Language'] = $arguments['language'];
+        }
+
         return $this->options;
     }
 

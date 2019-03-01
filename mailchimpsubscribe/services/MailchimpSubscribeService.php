@@ -32,6 +32,15 @@ class MailchimpSubscribeService extends BaseApplicationComponent
         if ($email != '' && $this->validateEmail($email)) { // validate email
 
             $listIdStr = $formListId != '' ? $formListId : $this->getSetting('mcsubListId');
+            $dsgvoEmailOptinId = $this->getSetting('dsgvoEmailOptinId');
+
+            $marketingPermissions = array();
+            if (!empty($dsgvoEmailOptinId)) {
+              $marketingPermissions = array(array(
+                'marketing_permission_id' => $dsgvoEmailOptinId,
+                'enabled' => true
+              ));
+            }
 
             // check if we got an api key and a list id
             if ($this->getSetting('mcsubApikey') != '' && $listIdStr != '') {
@@ -60,16 +69,20 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                     if ($member && isset($member['interests']) && !empty($interests)) {
                         $interests = $this->_prepInterests($listId, $member, $interests);
                     }
-                    
+
                     // subscribe
                     $postVars = array(
                       'status_if_new' => $this->getSetting('mcsubDoubleOptIn') ? 'pending' : 'subscribed',
                       'email_type' => $emailType,
                       'email_address' => $email
                     );
-                    
+
                     if ($member && $member['status']==='unsubscribed') {
                         $postVars['status'] = 'subscribed';
+                    }
+
+                    if (!empty($marketingPermissions)) {
+                      $postVars['marketing_permissions'] = $marketingPermissions;
                     }
 
                     if (count($vars) > 0) {
@@ -144,7 +157,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                         $vars = array(
                           'status' => 'unsubscribed'
                         );
-    
+
                         try {
                             $result = $mc->request('lists/' . $listId . '/members/' . md5(strtolower($email)), $vars, 'PATCH');
                             array_push($results, $this->_getMessage(200, $email, $vars, Craft::t("Unsubscribed successfully"), true));
@@ -157,12 +170,12 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
                 if (count($results) === 0) {
                     return null;
-                } 
-                
+                }
+
                 if (count($results) > 1) {
                     return $this->_parseMultipleListsResult($results);
                 }
-                
+
                 return $results[0];
 
             } else {
@@ -174,8 +187,8 @@ class MailchimpSubscribeService extends BaseApplicationComponent
             // error, invalid email
             return $this->_getMessage(1000, $email, $vars, Craft::t("Invalid email"));
         }
-    }    
-    
+    }
+
     /**
      * Return user object by email if it is present in one or more lists.
      *
@@ -193,7 +206,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
         } catch (\Exception $e) { // subscriber didn't exist
             $member = false;
         }
-        
+
         return $member;
     }
 
@@ -215,7 +228,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
                 $results = array();
                 $member = $this->_getMemberByEmail($email, $listIdStr);
-                
+
                 if ($member && $member['status'] !== 'unsubscribed') {
                     array_push($results, $this->_getMessage(200, $email, array(), Craft::t("The email address passed exists on this list"), true));
                 } else {
@@ -309,7 +322,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
     /**
      * Removes existing interests in groups of type radio or dropdown, and merges all other interests
-     * 
+     *
      * @param $listId
      * @param $member
      * @param $interests
@@ -319,17 +332,17 @@ class MailchimpSubscribeService extends BaseApplicationComponent
     {
         $interestGroupsResult = $this->getListInterestGroups($listId);
         $memberInterests = (array)$member['interests'];
-        
+
         // reset any id's in member object that belong to a select or radio group, if there is an id in interests array in that group.
         foreach ($interestGroupsResult['groups'] as $group) {
             if ($group['type'] == 'radio' || $group['type'] == 'dropdown') {
                 if ($this->_interestsHasIdInGroup($interests, $group['interests'])) {
-                    
+
                     // reset all member interests for group interests
                     foreach ($group['interests'] as $groupInterest) {
                         $memberInterests[$groupInterest['id']] = false;
                     }
-                } 
+                }
             }
         }
 
@@ -338,7 +351,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
 
     /**
      * Check if there is an id in the posted interests, in a groups interests
-     * 
+     *
      * @param $interests
      * @param $groupInterests
      * @return bool
@@ -352,10 +365,10 @@ class MailchimpSubscribeService extends BaseApplicationComponent
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Creates returned message object
      *
@@ -505,6 +518,7 @@ class MailchimpSubscribeService extends BaseApplicationComponent
         $settings = array();
         $settings['mcsubApikey'] = craft()->config->get('mcsubApikey') !== null ? craft()->config->get('mcsubApikey') : $plugin_settings['mcsubApikey'];
         $settings['mcsubListId'] = craft()->config->get('mcsubListId') !== null ? craft()->config->get('mcsubListId') : $plugin_settings['mcsubListId'];
+        $settings['dsgvoEmailOptinId'] = craft()->config->get('dsgvoEmailOptinId') !== null ? craft()->config->get('dsgvoEmailOptinId') : $plugin_settings['dsgvoEmailOptinId'];
         $settings['mcsubDoubleOptIn'] = craft()->config->get('mcsubDoubleOptIn') !== null ? craft()->config->get('mcsubDoubleOptIn') : $plugin_settings['mcsubDoubleOptIn'];
 
         return $settings;

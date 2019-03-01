@@ -14,11 +14,11 @@ namespace Craft;
 
 class MailchimpSubscribePlugin extends BasePlugin
 {
-    protected $_version = '1.1.6',
+    protected $_version = '1.1.7',
       $_schemaVersion = '1.0.0',
       $_name = 'Mailchimp Subscribe',
-      $_url = 'https://github.com/aelvan/mailchimp-subscribe-craft',
-      $_releaseFeedUrl = 'https://raw.githubusercontent.com/aelvan/mailchimp-subscribe-craft/master/releases.json',
+      $_url = 'https://github.com/ClemensSchneider/mailchimp-subscribe-craft',
+      $_releaseFeedUrl = 'https://raw.githubusercontent.com/ClemensSchneider/mailchimp-subscribe-craft/craft2/releases.json',
       $_documentationUrl = 'https://github.com/aelvan/mailchimp-subscribe-craft/blob/master/README.md',
       $_description = '',
       $_developer = 'André Elvan',
@@ -91,6 +91,7 @@ class MailchimpSubscribePlugin extends BasePlugin
         return array(
           'mcsubApikey' => array(AttributeType::String, 'default' => ''),
           'mcsubListId' => array(AttributeType::String, 'default' => ''),
+          'dsgvoEmailOptinId' => array(AttributeType::String, 'default' => ''),
           'mcsubDoubleOptIn' => array(AttributeType::Bool, 'default' => true)
         );
     }
@@ -100,6 +101,7 @@ class MailchimpSubscribePlugin extends BasePlugin
         $config_settings = array();
         $config_settings['mcsubApikey'] = craft()->config->get('mcsubApikey');
         $config_settings['mcsubListId'] = craft()->config->get('mcsubListId');
+        $config_settings['dsgvoEmailOptinId'] = craft()->config->get('dsgvoEmailOptinId');
         $config_settings['mcsubDoubleOptIn'] = craft()->config->get('mcsubDoubleOptIn');
 
         return craft()->templates->render('mailchimpsubscribe/settings', array(

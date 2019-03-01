@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.1.7",
+    "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/craft2.zip",
+    "date": "2018-03-01T08:00:00+02:00",
+    "notes": [
+      "[Added] Add support for custom marketing-info email field."
+    ]
+  },{
     "version": "1.1.6",
     "downloadUrl": "https://github.com/aelvan/mailchimp-subscribe-craft/archive/master.zip",
     "date": "2018-02-18T12:41:00+02:00",
@@ -46,7 +53,7 @@
     "date": "2016-09-11T19:34:00+02:00",
     "notes": [
       "[Added] Added (non-existing) schema version"
-     
+
     ]
   },
   {
